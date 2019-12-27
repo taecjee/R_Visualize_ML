@@ -1,6 +1,14 @@
 # Load Mninst Data
-mnist.train <- read.csv("C:\\Users\\opc\\Downloads\\mnist_csv\\train.csv")
-mnist.test <- read.csv("C:\\Users\\opc\\Downloads\\mnist_csv\\test.csv")
+dataDirectory <- "../data"
+if (!file.exists(paste(dataDirectory, '/train.csv', sep=""))) {
+  link <- 'https://github.com/taecjee/R_Visualize_ML/tree/master/data/mnist_csv.zip'
+  if (!file.exists(paste(dataDirectory, '/mnist_csv.zip', sep=""))) 
+    download.file(link, destfile = paste(dataDirectory, '/mnist_csv.zip', sep=""), exdir = dataDirectory)
+  unzip(paste(dataDirectory, '/mnist_csv.zip', sep = ""), exdir=dataDirectory)
+}
+
+mnist.train <- read.csv(paste(dataDirectory, '/train.csv', sep=""))
+mnist.test <- read.csv(paste(dataDirectory, '/test.csv', sep=""))
 
 # show MNIST Image
 im<-matrix((mnist.train[4,2:ncol(mnist.train)]), nrow=28, ncol=28)

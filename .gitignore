@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 # compressed files
 .zip
+
+# data files
+.csv
