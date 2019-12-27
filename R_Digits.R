@@ -1,9 +1,9 @@
 # Load Mninst Data
 dataDirectory <- "../data"
 if (!file.exists(paste(dataDirectory, '/train.csv', sep=""))) {
-  link <- 'https://github.com/taecjee/R_Visualize_ML/tree/master/data/mnist_csv.zip'
+  link <- 'https://github.com/taecjee/R_Visualize_ML/raw/master/data/mnist_csv.zip'
   if (!file.exists(paste(dataDirectory, '/mnist_csv.zip', sep=""))) 
-    download.file(link, destfile = paste(dataDirectory, '/mnist_csv.zip', sep=""), exdir = dataDirectory)
+    download.file(link, destfile = paste(dataDirectory, '/mnist_csv.zip', sep=""))
   unzip(paste(dataDirectory, '/mnist_csv.zip', sep = ""), exdir=dataDirectory)
 }
 
@@ -48,3 +48,4 @@ par(mar=c(1, 0, 3, 0), xaxs='i', yaxs='i')
 for (idx in 1:36) { 
   img(mnist.train, idx)
 }
+par(mfcol=c(1,1))
