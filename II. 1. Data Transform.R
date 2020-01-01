@@ -1,6 +1,7 @@
-# 조건에 따른 관찰값의 선택
 install.packages("dplyr")
 library(dplyr)
+
+# 조건에 따른 관찰값의 선택
 
 filter(mtcars, mpg >= 30)
 filter(mtcars, mpg >= 30 & wt < 1.8)
