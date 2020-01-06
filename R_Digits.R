@@ -103,7 +103,12 @@ preds <- ifelse(preds$net.result > 0.5, "1", "0")
 t <- table(digits_nn[test, "y"], preds, dnn = c("Actual", "Predicted"))
 acc <- round(100.9 * sum(diag(t))/sum(t), 2)
 print(t)
+#       Predicted
+# Actual   0   1
+#      0 740  17
+#      1  17 813
 print(sprintf(" accuracy = %1.2f%%", acc))
+# [1] " accuracy = 98.74%"
 
 # without pca
 nn.all <- neuralnet( y ~ ., data = digits_nn[sample,], hidden = c(4,2), linear.output = FALSE)
@@ -113,7 +118,12 @@ preds.all <- ifelse(preds.all$net.result > 0.5, "1", "0")
 t.all <- table(digits_nn[test, "y"], preds.all, dnn = c("Actual", "Predicted"))
 acc.all <- round(100.9 * sum(diag(t.all))/sum(t.all), 2)
 print(t.all)
+#        Predicted
+# Actual   0   1
+#      0 731  26
+#      1  34 796
 print(sprintf(" accuracy = %1.2f%%", acc.all))
+# [1] " accuracy = 97.09%"
 
 
 # multi-classification
@@ -137,6 +147,7 @@ barplot(table(digits.test.y), main = "Distribution of y values (test)")
 #install.packages("e1071")
 library(nnet)
 library(caret)
+library(e1071)
 set.seed(42)
 tic <- proc.time()
 digits.m1 <- caret::train(digits.X, digits.y,
@@ -148,11 +159,14 @@ digits.m1 <- caret::train(digits.X, digits.y,
                           MaxNWts = 10000,
                           maxit = 100)
 print(proc.time() - tic)
+#    user  system elapsed 
+#    0.37    0.00    0.45 
 
 # pridict
 digits.yhat1 <- predict(digits.m1, newdata = digits.test.X)
 accuracy <- 100.0 * sum(digits.yhat1 == digits.test.y)/length(digits.test.y)
 print(sprintf(" accuracy = %1.2f%%", accuracy))
+# [1] " accuracy = 38.60%"
 barplot(table(digits.yhat1), main = "Distribution of y values (model 1)")
 table(digits.test.y, digits.yhat1)
 caret::confusionMatrix(xtabs(~digits.yhat1 + digits.test.y))
@@ -171,10 +185,13 @@ digits.m2 <- caret::train(digits.X, digits.y,
                           MaxNWts = 50000,
                           maxit = 100)
 print(proc.time() - tic)
+#    user  system elapsed 
+#  148.00    0.02  148.24 
 
 # pridict next model
 digits.yhat2 <- predict(digits.m2, newdata = digits.test.X)
 accuracy <- 100.0 * sum(digits.yhat2 == digits.test.y)/length(digits.test.y)
+# [1] " accuracy = 72.20%"
 print(sprintf(" accuracy = %1.2f%%", accuracy))
 barplot(table(digits.yhat2), main = "Distribution of y values (model 2)")
 table(digits.test.y, digits.yhat2)
@@ -194,11 +211,93 @@ digits.m3 <- caret::train(digits.X, digits.y,
                           MaxNWts = 50000,
                           maxit = 100)
 print(proc.time() - tic)
+#    user  system elapsed 
+# 2164.09    1.25 2168.64 
 
 # pridict next model 3
 digits.yhat3 <- predict(digits.m3, newdata = digits.test.X)
 accuracy <- 100.0 * sum(digits.yhat3 == digits.test.y)/length(digits.test.y)
 print(sprintf(" accuracy = %1.2f%%", accuracy))
-barplot(table(digits.yhat2), main = "Distribution of y values (model 3)")
+# [1] " accuracy = 83.70%"
+barplot(table(digits.yhat3), main = "Distribution of y values (model 3)")
 table(digits.test.y, digits.yhat3)
 caret::confusionMatrix(xtabs(~digits.yhat3 + digits.test.y))
+
+
+## learn by SNNS (Stuttgart Neural Networks Simulator)
+install.packages("RSNNS")
+library(RSNNS)
+
+# one-hot encoding
+head(decodeClassLabels(digits.y))
+
+set.seed(42)
+tic <- proc.time()
+digits.m4 <- mlp(as.matrix(digits.X),
+                 decodeClassLabels(digits.y),
+                 size = 40,
+                 learnFunc = "Rprop",
+                 shufflePatterns = FALSE,
+                 maxit = 80)
+print(proc.time() - tic)
+#    user  system elapsed 
+#   66.92    0.01   67.11
+
+digits.yhat4 <- predict(digits.m4, newdata = digits.test.X)
+digits.yhat4 <- encodeClassLabels(digits.yhat4)
+accuracy <- 100.0 * sum(I(digits.yhat4 - 1) == digits.test.y)/length(digits.test.y)
+print(sprintf(" accuracy = %1.2f%%", accuracy))
+# [1] " accuracy = 81.00%"
+barplot(table(digits.yhat4), main = "Distribution of y values (model 4)")
+table(digits.test.y, digits.yhat4)
+
+# Winner Takes ALL
+digits.yhat4_b <- predict(digits.m4, newdata = digits.test.X)
+head(round(digits.yhat4_b, 2))
+
+digits.yhat4_b_1 <- encodeClassLabels(digits.yhat4_b, method = "WTA", l = 0, h = 0)
+table(digits.yhat4_b_1)
+#   1   2   3   4   5   6   7   8   9  10 
+# 117 109 106 110  96  76  88 107  79 112
+accuracy_b_1 <- 100.0 * sum(I(digits.yhat4_b_1 - 1) == digits.test.y)/length(digits.test.y)
+print(sprintf(" accuracy = %1.2f%%", accuracy_b_1))
+# [1] " accuracy = 81.00%"
+
+digits.yhat4_b_2 <- encodeClassLabels(digits.yhat4_b, method = "WTA", l = 0, h = 0.5)
+table(digits.yhat4_b_2)
+#   0   1   2   3   4   5   6   7   8   9  10 
+# 139 106 103  95  88  78  57  85  91  72  86 
+accuracy_b_2 <- 100.0 * sum(I(digits.yhat4_b_2 - 1) == digits.test.y)/length(digits.test.y)
+print(sprintf(" accuracy = %1.2f%%", accuracy_b_2))
+# [1] " accuracy = 75.40%"
+unknown_b_2 <- 100.0 * length(which(digits.yhat4_b_2 == 0))/length(digits.yhat4_b_2)
+print(sprintf(" unknown = %1.2f%%", unknown_b_2))
+# [1] " unknown = 13.90%"
+print(sprintf(" total accuracy = %1.2f%%", accuracy_b_2 + unknown_b_2))
+# [1] " total accuracy = 89.30%"
+
+digits.yhat4_b_3 <- encodeClassLabels(digits.yhat4_b, method = "WTA", l = 0.2, h = 0.5)
+table(digits.yhat4_b_3)
+#   0   1   2   3   4   5   6   7   8   9  10 
+# 168 102 103  92  87  75  53  84  89  67  80 
+accuracy_b_3 <- 100.0 * sum(I(digits.yhat4_b_3 - 1) == digits.test.y)/length(digits.test.y)
+print(sprintf(" accuracy = %1.2f%%", accuracy_b_3))
+# [1] " accuracy = 74.00%"
+unknown_b_3 <- 100.0 * length(which(digits.yhat4_b_3 == 0))/length(digits.yhat4_b_3)
+print(sprintf(" unknown = %1.2f%%", unknown_b_3))
+# [1] " unknown = 16.80%"
+print(sprintf(" total accuracy = %1.2f%%", accuracy_b_3 + unknown_b_3))
+# [1] " total accuracy = 90.80%"
+
+digits.yhat4_b_4 <- encodeClassLabels(digits.yhat4_b, method = "402040", l = 0.4, h = 0.6)
+table(digits.yhat4_b_4)
+#   0   1   2   3   4   5   6   7   8   9  10 
+# 260  94  99  82  77  66  43  81  78  55  65
+accuracy_b_4 <- 100.0 * sum(I(digits.yhat4_b_4 - 1) == digits.test.y)/length(digits.test.y)
+print(sprintf(" accuracy = %1.2f%%", accuracy_b_4))
+# [1] " accuracy = 67.70%"
+unknown_b_4 <- 100.0 * length(which(digits.yhat4_b_4 == 0))/length(digits.yhat4_b_4)
+print(sprintf(" unknown = %1.2f%%", unknown_b_4))
+# [1] " unknown = 26.00%"
+print(sprintf(" total accuracy = %1.2f%%", accuracy_b_4 + unknown_b_4))
+# [1] " total accuracy = 93.70%"
