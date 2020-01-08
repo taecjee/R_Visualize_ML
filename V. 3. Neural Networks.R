@@ -296,6 +296,7 @@ print(sprintf(" unknown = %1.2f%%", unknown_b_2))
 print(sprintf(" total accuracy = %1.2f%%", accuracy_b_2 + unknown_b_2))
 # [1] " total accuracy = 89.30%"
 
+## 실환경에서 데이터 예측 방법 3
 digits.yhat4_b_3 <- encodeClassLabels(digits.yhat4_b, method = "WTA", l = 0.2, h = 0.5)
 table(digits.yhat4_b_3)
 #   0   1   2   3   4   5   6   7   8   9  10 
@@ -309,7 +310,7 @@ print(sprintf(" unknown = %1.2f%%", unknown_b_3))
 print(sprintf(" total accuracy = %1.2f%%", accuracy_b_3 + unknown_b_3))
 # [1] " total accuracy = 90.80%"
 
-## 실환경에서 데이터 예측 방법 3
+## 실환경에서 데이터 예측 방법 4
 digits.yhat4_b_4 <- encodeClassLabels(digits.yhat4_b, method = "402040", l = 0.4, h = 0.6)
 table(digits.yhat4_b_4)
 #   0   1   2   3   4   5   6   7   8   9  10 
