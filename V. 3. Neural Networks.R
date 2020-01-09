@@ -323,3 +323,57 @@ print(sprintf(" unknown = %1.2f%%", unknown_b_4))
 # [1] " unknown = 26.00%"
 print(sprintf(" total accuracy = %1.2f%%", accuracy_b_4 + unknown_b_4))
 # [1] " total accuracy = 93.70%"
+
+## 과적합 (Overfitting)
+# 학습 데이터에 대한 인식률
+digits.yhat4.train <- predict(digits.m4)
+digits.yhat4.train <- encodeClassLabels(digits.yhat4.train)
+accuracy <- 100.0*sum(I(digits.yhat4.train - 1)==digits.y)/length(digits.y)
+print(sprintf(" accuracy = %1.2f%%",accuracy))
+
+# 모든 모델의 학습 데이터에 대한 인식률
+digits.yhat1.train <- predict(digits.m1)
+digits.yhat2.train <- predict(digits.m2)
+digits.yhat3.train <- predict(digits.m3)
+digits.yhat4.train <- predict(digits.m4)
+digits.yhat4.train <- encodeClassLabels(digits.yhat4.train)
+
+# 학습 데이터 인식률과 테스트 데이터 인식률을 결합
+measures <- c("AccuracyNull", "Accuracy", "AccuracyLower", "AccuracyUpper")
+n5.insample <- caret::confusionMatrix(xtabs(~digits.y + digits.yhat1.train))
+n5.outsample <- caret::confusionMatrix(xtabs(~digits.test.y + digits.yhat1))
+n10.insample <- caret::confusionMatrix(xtabs(~digits.y + digits.yhat2.train))
+n10.outsample <- caret::confusionMatrix(xtabs(~digits.test.y + digits.yhat2))
+n40.insample <- caret::confusionMatrix(xtabs(~digits.y + digits.yhat3.train))
+n40.outsample <- caret::confusionMatrix(xtabs(~digits.test.y + digits.yhat3))
+n40b.insample <- caret::confusionMatrix(xtabs(~digits.y + I(digits.yhat4.train - 1)))
+n40b.outsample <- caret::confusionMatrix(xtabs(~ digits.test.y + I(digits.yhat4 - 1)))
+shrinkage <- rbind(cbind(Size = 5, Sample = "In",
+                         as.data.frame(t(n5.insample$overall[measures]))),
+                   cbind(Size = 5, Sample = "Out",
+                         as.data.frame(t(n5.outsample$overall[measures]))),
+                   cbind(Size = 10, Sample = "In",
+                         as.data.frame(t(n10.insample$overall[measures]))),
+                   cbind(Size = 10, Sample = "Out",
+                         as.data.frame(t(n10.outsample$overall[measures]))),
+                   cbind(Size = 40, Sample = "In",
+                         as.data.frame(t(n40.insample$overall[measures]))),
+                   cbind(Size = 40, Sample = "Out",
+                         as.data.frame(t(n40.outsample$overall[measures]))),
+                   cbind(Size = 40, Sample = "In",
+                         as.data.frame(t(n40b.insample$overall[measures]))),
+                   cbind(Size = 40, Sample = "Out",
+                         as.data.frame(t(n40b.outsample$overall[measures])))
+)
+shrinkage$Pkg <- rep(c("nnet", "RSNNS"), c(6, 2))
+
+# 그림으로 나타내기
+dodge <- position_dodge(width=0.4)
+ggplot(shrinkage, aes(interaction(Size, Pkg, sep = " : "), Accuracy,
+                      ymin = AccuracyLower, ymax = AccuracyUpper,
+                      shape = Sample, linetype = Sample)) +
+  geom_point(size = 2.5, position = dodge) +
+  geom_errorbar(width = .25, position = dodge) +
+  xlab("") + ylab("Accuracy + 95% CI") +
+  theme_classic() +
+  theme(legend.key.size = unit(1, "cm"), legend.position = c(.8, .2))
