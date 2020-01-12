@@ -112,7 +112,7 @@ order_df
 part_df %>% left_join(order_df, by = "num")
 part_df %>% inner_join(order_df, by = "num")
 
-# 다음의 두 데이터 프레임 생성
+## 다음의 두 데이터 프레임 생성
 jan <- tibble(reg = c("NE", "SW", "W"),
               tempjan = c(34, 60, 55))
 jan
@@ -128,3 +128,25 @@ jan %>% left_join(sep, by = "reg")
 jan %>% left_join(sep, by = "reg") %>% 
   rename(jan = tempjan, sep = tempsep) %>% 
   gather(key = Month, value = Temp, jan, sep)
+
+## 국내 총인구 데이터
+popData2010 <- popData %>% 
+  select("Ages", "2010_Total", "2010_Men", "2010_Women") %>% 
+  gather(key = Key, value = Population, `2010_Total`, `2010_Men`, `2010_Women`) %>% 
+  separate(col = Key, into = c("Year", "Key"), sep = "_") %>% 
+  mutate(Population = as.numeric(Population)) %>% 
+  arrange(Ages)
+
+popData2000 <- popData %>% 
+  select("Ages", "2000_Total", "2000_Men", "2000_Women") %>% 
+  gather(key = Key, value = Population, `2000_Total`, `2000_Men`, `2000_Women`) %>% 
+  separate(col = Key, into = c("Year", "Key"), sep = "_") %>% 
+  mutate(Population = as.numeric(Population)) %>% 
+  arrange(Ages)
+
+popDataTotal <- popData %>% 
+  filter(Ages == "계") %>% 
+  select(ends_with("Total")) %>% 
+  gather(key = Year, value = Population) %>% 
+  separate(col = Year, into = c("Year", "Key"), sep = "_")%>% 
+  mutate(Population = as.numeric(Population))

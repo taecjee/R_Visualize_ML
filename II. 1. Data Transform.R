@@ -125,3 +125,10 @@ mtcars %>%
             avg_disp_cc = mean(disp_cc),
             avg_hp = mean(hp),
             avg_wt = mean(wt))
+
+## 국내 총인구 데이터
+# 열 (Column) 이름 변경
+colnames(popData) <- c("NOT", "Ages", paste(rep(c("1944", "1949", "1955", "1960", "1966", "1970", "1975", "1980", "1985", "1990", "1995", "2000", "2005", "2010"), each = 3), rep(c("Total", "Men", "Women"), 14), sep="_"))
+# 첫째 행 제거, 첫째 열 제거
+popData <- popData[-1,]
+popData <- popData[,-1]
