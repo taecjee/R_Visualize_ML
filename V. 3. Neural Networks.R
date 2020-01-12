@@ -377,3 +377,26 @@ ggplot(shrinkage, aes(interaction(Size, Pkg, sep = " : "), Accuracy,
   xlab("") + ylab("Accuracy + 95% CI") +
   theme_classic() +
   theme(legend.key.size = unit(1, "cm"), legend.position = c(.8, .2))
+
+
+
+
+
+
+
+
+
+
+## 연습문제
+# iris 데이터 학습 
+set.seed(1234)
+iris.nnet <- nnet(Species ~ ., train.data, size = 20)
+
+# 학습 데이터 정확도
+(trTable.iris.nn <- table(predict(iris.nnet, type = "class"), train.data$Species))
+(trAccuracy.iris.nn <- sum(diag(trTable.iris.nn)) / sum(trTable.iris.nn))
+
+# 테스트 데이터 정확도 
+testPred.iris.nn <- predict(iris.nnet, newdata = test.data, type = "class")
+(teTable.iris.nn <- table(testPred.iris.nn, test.data$Species))
+(teAccuracy.iris.nn <- sum(diag(teTable.iris.nn)) / sum(teTable.iris.nn))

@@ -88,3 +88,26 @@ testPred.rf <- predict(rf, newdata = test.data)
 
 (teTable.rf <- table(testPred.rf, test.data$Species))
 (teAccuracy.rf <- sum(diag(teTable.rf)) / sum(teTable.rf))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 연습문제 
+data("mammoexp", package = "TH.data")
+mammoct <- ctree(ME ~ ., data = mammoexp) 
+plot(mammoct)
+
+# 클래스 가능성 예측
+treeresponse(mammoct, newdata = mammoexp[1:10,])
+mammoexp[1:10, "ME"]
