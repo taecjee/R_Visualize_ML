@@ -110,3 +110,54 @@ StrengthPred <- predict(fit)
 # 그림으로 나타내기
 plot(concrete$Strength, StrengthPred, xlab = 'Observed', ylab = 'Prediction')
 abline(a = 0, b = 1, col = 'red', lwd = 2)
+
+
+## 국내 인구 증가율 lm 모델 만들기
+# 데이터 읽기
+load("data/popRateData.RData")
+View(popRateData)
+
+# 그림으로 나타내기
+p <- ggplot(as.data.frame(popRateData), aes(year, popRate)) + 
+  geom_point()
+p
+
+# 연도를 2060년 까지 나타내기
+p2 <- p + xlim(1960, 2060) + ylim(-3, 3)
+p2
+
+# lm으로 예측하기
+pop.lm <- lm(popRate ~ year, as.data.frame(popRateData))
+p3 <- p2 + geom_abline(intercept = pop.lm$coefficients[1], slope = pop.lm$coefficients[2], size = 1, color = "red")
+p3
+
+p2 + stat_smooth(method = "lm", se = FALSE)
+
+## 국내 인구증가율 예측하기
+# 2060년까지 예측하기
+year2 <- data.frame(year = rep(2019:2060))
+predRate <- predict(pop.lm, year2)
+predPopRate <- data.frame(year = year2, popRate = predRate)
+
+# 구분자를 넣어서 관측치와 예측치를 하나로 나타내기
+popRateData2 <- cbind(as.data.frame(popRateData), type = "org")
+predPopRate2 <- cbind(as.data.frame(predPopRate), type = "pred")
+totalPopRate.lm <- rbind(popRateData2, predPopRate2)
+
+# 그림으로 나타내기
+p.lm <- ggplot(totalPopRate.lm, aes(year, popRate, col = type))
+p.lm + geom_point()
+
+## 통계청 예측치와 비교하기
+# 데이터 읽기 (popDataKostat)
+load("data/popData.RData")
+View(popDataKostat)
+
+# 예측치와 통계데이터를 하나로 합치기
+popDataKostat2 <- cbind(popDataKostat[-1, c("year", "popRate")], type = "kostat")
+totalPopRate.lm2 <- cbind(totalPopRate.lm[, c("year", "popRate")], type = "pred")
+totalPopRate.lmNew <- rbind(popDataKostat2, totalPopRate.lm2)
+
+# 그림으로 나타내기
+p.lm2 <- ggplot(totalPopRate.lmNew, aes(year, popRate, col = type))
+p.lm2 + geom_point()
