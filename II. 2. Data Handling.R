@@ -1,4 +1,4 @@
-install.packages("tidyr")
+#install.packages("tidyr")
 library(tidyr)
 
 # gather로 tidy 데이터 만들기

@@ -1,6 +1,6 @@
 ## ggplot2
 
-install.packages("ggplot2")
+#install.packages("ggplot2")
 
 library(ggplot2)
 
@@ -130,7 +130,7 @@ p + geom_boxplot()
 p + geom_boxplot() + coord_flip()
 
 ## 동적 데이터 시각화
-install.packages("plotly")
+#install.packages("plotly")
 library(plotly)
 
 ggplotly(ggplot(USArrests, aes(Murder, Assault)) +
